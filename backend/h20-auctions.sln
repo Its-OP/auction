@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "h20auctions", "h20auctions.csproj", "{1966FCE7-A03B-40C7-90DE-B8FE3B531791}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "web", "web.csproj", "{1966FCE7-A03B-40C7-90DE-B8FE3B531791}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
