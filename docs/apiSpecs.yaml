@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  version: 1.0.11
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+paths:
+  /auth/signUp:
+    post:
+      tags:
+        - auth
+      operationId: signUp
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Token'
+  /auth/signIn:
+    post:
+      tags:
+        - auth
+      operationId: signIn
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+  /auction:
+    get:
+      tags:
+        - auctions
+      operationId: auction
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lots'
+  /auction/lots/{id}:
+    get:
+      tags:
+        - auctions
+      operationId: getLot
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lot'
+    put:
+      tags:
+        - auctions
+      operationId: updateLot
+      content:
+        body:
+          $ref: '#/components/schemas/Lot'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lot'
+                
+    post:
+      tags:
+        - auctions
+      operationId: addStake
+      content:
+        body:
+          $ref: '#/components/schemas/Lot'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lot'
+  /auction/lots/add:
+      post:
+        tags:
+          - auctions
+        operationId: addLot
+        content:
+          body:
+            $ref: '#/components/schemas/StakeValue'
+        responses:
+          '200':
+            description: Successful operation
+                
+components:
+  schemas:
+    StakeValue:
+      type: object
+      properties:
+        amount:
+          type: integer
+    Stakes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Stake'
+    Stake:
+      type: object
+      properties:
+        amount:
+          type: integer
+        datetime:
+          type: string
+        username:
+          type: string
+    Lots:
+      type: array
+      items:
+        $ref: '#/components/schemas/Lot'
+    Lot:
+      type: object
+      properties:
+        title:
+          type: string
+        minPrice:
+          type: integer
+        minStake:
+          type: integer
+        description:
+          type: string
+        thumbnailUrl:
+          type: string
+        galleryUrls:
+          type: array
+          items:
+            type: string
+        stakes:
+          $ref: '#/components/schemas/Stakes'
+    Token:
+      type: object
+      properties:
+        jwt:
+          type: string
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
