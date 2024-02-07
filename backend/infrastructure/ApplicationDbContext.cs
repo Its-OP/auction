@@ -25,7 +25,7 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
         //     ? _configuration.GetConnectionString("InContainer")
         //     : _configuration.GetConnectionString("Native");
         
-        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Native"));
+        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("InContainer"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
