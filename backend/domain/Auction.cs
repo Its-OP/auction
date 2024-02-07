@@ -2,9 +2,9 @@
 
 public class Auction
 {
-    public Auction(int id, string title, decimal minPrice, string description, IEnumerable<Image> images, IEnumerable<Stake> stakes)
+    public Auction() {}
+    public Auction(string title, decimal minPrice, string description, IEnumerable<Image> images, IEnumerable<Stake> stakes)
     {
-        Id = id;
         Title = title;
         MinPrice = minPrice;
         Description = description;
@@ -13,13 +13,13 @@ public class Auction
         Stakes = stakes;
     }
 
-    public int Id { get; }
-    public string Title { get; }
-    public decimal MinPrice { get; }
-    public string Description { get; }
-    public AuctionStatus Status { get; }
-    public IEnumerable<Image> Images { get; }
-    public IEnumerable<Stake> Stakes { get; }
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public decimal MinPrice { get; set; }
+    public string Description { get; set; }
+    public AuctionStatus Status { get; set; }
+    public IEnumerable<Image> Images { get; set; }
+    public IEnumerable<Stake> Stakes { get; set; }
 }
 
 public enum AuctionStatus

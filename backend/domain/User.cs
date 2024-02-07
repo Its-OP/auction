@@ -2,14 +2,14 @@
 
 public class User
 {
-    public User(int id, string username, string passwordHash)
+    public User() {}
+    public User(string username, string passwordHash)
     {
-        Id = id;
         Username = username;
         PasswordHash = passwordHash;
     }
 
-    public int Id { get; }
-    public string Username { get; }
-    public string PasswordHash { get; }
+    public int Id { get; set; }
+    public string Username { get; set; }
+    public string PasswordHash { get; set; }
 }

@@ -2,9 +2,10 @@
 
 public class Image
 {
-    public int Id { get; }
-    public string Url { get; }
-    public ImageClass Class { get; }
+    public Image() {}
+    public int Id { get; set; }
+    public string Url { get; set; }
+    public ImageClass Class { get; set; }
 }
 
 public enum ImageClass

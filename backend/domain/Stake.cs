@@ -2,6 +2,7 @@
 
 public class Stake
 {
+    public Stake() {}
     public Stake(decimal amount, DateTime timestamp, User user)
     {
         Amount = amount;
@@ -9,8 +10,8 @@ public class Stake
         User = user;
     }
     
-    public int Id { get; }
-    public decimal Amount { get; }
-    public DateTime Timestamp { get; }
-    public User User { get; }
+    public int Id { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime Timestamp { get; set; }
+    public User User { get; set; }
 }
