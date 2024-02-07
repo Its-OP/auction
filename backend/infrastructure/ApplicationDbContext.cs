@@ -21,11 +21,11 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
-            ? _configuration.GetConnectionString("InContainer")
-            : _configuration.GetConnectionString("Native");
+        // var connectionString = (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") ?? string.Empty) == "true"
+        //     ? _configuration.GetConnectionString("InContainer")
+        //     : _configuration.GetConnectionString("Native");
         
-        optionsBuilder.UseNpgsql(_configuration.GetConnectionString(connectionString ?? string.Empty));
+        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Native"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,6 +65,9 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
             
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            entity.HasIndex(x => x.Username).IsUnique();
+            entity.HasIndex(x => new { x.Username, x.PasswordHash });
         });
     }
 }
