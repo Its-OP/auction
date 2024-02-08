@@ -21,11 +21,7 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // var connectionString = (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") ?? string.Empty) == "true"
-        //     ? _configuration.GetConnectionString("InContainer")
-        //     : _configuration.GetConnectionString("Native");
-        
-        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Native"));
+        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Database"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

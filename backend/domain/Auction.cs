@@ -1,4 +1,6 @@
-﻿namespace domain;
+﻿using System.Text.Json.Serialization;
+
+namespace domain;
 
 public class Auction
 {
@@ -45,6 +47,11 @@ public class Auction
         return false;
     }
 
+    public void Close()
+    {
+        Status = AuctionStatus.Closed;
+    }
+
     private Bid Bid(decimal value)
     {
         var bid = new Bid(value, DateTime.UtcNow, this);
@@ -54,6 +61,7 @@ public class Auction
     }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AuctionStatus
 {
     Active,

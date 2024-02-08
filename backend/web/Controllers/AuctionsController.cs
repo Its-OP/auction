@@ -34,6 +34,21 @@ public class AuctionsController : ControllerBase
         return Ok();
     }
     
+    [HttpPost]
+    [Route("close/{auctionId:int}")]
+    public async Task<IActionResult> CloseAuction([FromRoute] int auctionId, CancellationToken token)
+    {
+        var auction = await _context.Auctions.SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction not found");
+        
+        auction.Close();
+        _context.Auctions.Update(auction);
+        await _context.SaveChangesAsync(token);
+
+        return Ok();
+    }
+    
     [HttpGet]
     [Route("")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AuctionContract>))]
