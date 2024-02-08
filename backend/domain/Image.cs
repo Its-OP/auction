@@ -1,21 +1,24 @@
-﻿namespace domain;
+﻿using System.Text.Json.Serialization;
+
+namespace domain;
 
 public class Image
 {
-    public Image() {}
+    public Image() { }
 
-    public Image(string url, ImageClass @class)
+    public Image(ImageType type, ImageBody body)
     {
-        Url = url;
-        Class = @class;
+        Type = type;
+        Body = body;
     }
     
     public int Id { get; set; }
-    public string Url { get; set; }
-    public ImageClass Class { get; set; }
+    public ImageType Type { get; set; }
+    public ImageBody Body { get; set; }
 }
 
-public enum ImageClass
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ImageType
 {
     Thumbnail,
     Gallery

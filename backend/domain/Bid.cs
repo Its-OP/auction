@@ -1,17 +1,18 @@
 ﻿namespace domain;
 
-public class Stake
+public class Bid
 {
-    public Stake() {}
-    public Stake(decimal amount, DateTime timestamp, User user)
+    public Bid() {}
+    public Bid(decimal amount, DateTime timestamp, Auction auction)
     {
         Amount = amount;
         Timestamp = timestamp;
-        User = user;
+        Auction = auction;
     }
     
     public int Id { get; set; }
     public decimal Amount { get; set; }
     public DateTime Timestamp { get; set; }
     public User User { get; set; }
+    public Auction Auction { get; set; }
 }

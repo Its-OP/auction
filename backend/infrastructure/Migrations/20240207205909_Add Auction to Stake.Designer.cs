@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using infrastructure;
@@ -11,9 +12,11 @@ using infrastructure;
 namespace infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240207205909_Add Auction to Stake")]
+    partial class AddAuctiontoStake
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,15 +33,9 @@ namespace infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("CurrentPrice")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<decimal>("MinBidValue")
-                        .HasColumnType("numeric");
 
                     b.Property<decimal>("MinPrice")
                         .HasColumnType("numeric");
@@ -55,7 +52,32 @@ namespace infrastructure.Migrations
                     b.ToTable("Auctions", (string)null);
                 });
 
-            modelBuilder.Entity("domain.Bid", b =>
+            modelBuilder.Entity("domain.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AuctionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Class")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuctionId");
+
+                    b.ToTable("Images", (string)null);
+                });
+
+            modelBuilder.Entity("domain.Stake", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,51 +103,7 @@ namespace infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Bids", (string)null);
-                });
-
-            modelBuilder.Entity("domain.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AuctionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuctionId");
-
-                    b.ToTable("Images", (string)null);
-                });
-
-            modelBuilder.Entity("domain.ImageBody", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Base64Body")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId")
-                        .IsUnique();
-
-                    b.ToTable("ImageBody");
+                    b.ToTable("Stakes", (string)null);
                 });
 
             modelBuilder.Entity("domain.User", b =>
@@ -154,10 +132,17 @@ namespace infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("domain.Bid", b =>
+            modelBuilder.Entity("domain.Image", b =>
+                {
+                    b.HasOne("domain.Auction", null)
+                        .WithMany("Images")
+                        .HasForeignKey("AuctionId");
+                });
+
+            modelBuilder.Entity("domain.Stake", b =>
                 {
                     b.HasOne("domain.Auction", "Auction")
-                        .WithMany("Bids")
+                        .WithMany("Stakes")
                         .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -173,34 +158,11 @@ namespace infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("domain.Image", b =>
-                {
-                    b.HasOne("domain.Auction", null)
-                        .WithMany("Images")
-                        .HasForeignKey("AuctionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("domain.ImageBody", b =>
-                {
-                    b.HasOne("domain.Image", null)
-                        .WithOne("Body")
-                        .HasForeignKey("domain.ImageBody", "ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("domain.Auction", b =>
                 {
-                    b.Navigation("Bids");
-
                     b.Navigation("Images");
-                });
 
-            modelBuilder.Entity("domain.Image", b =>
-                {
-                    b.Navigation("Body")
-                        .IsRequired();
+                    b.Navigation("Stakes");
                 });
 #pragma warning restore 612, 618
         }

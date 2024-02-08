@@ -15,7 +15,7 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
     }
     
     public DbSet<Auction> Auctions { get; set; }
-    public DbSet<Stake> Stakes { get; set; }
+    public DbSet<Bid> Bids { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
 
@@ -25,7 +25,7 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
         //     ? _configuration.GetConnectionString("InContainer")
         //     : _configuration.GetConnectionString("Native");
         
-        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("InContainer"));
+        optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Native"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,8 +37,8 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedOnAdd();
 
-            entity.HasMany(x => x.Images).WithOne();
-            entity.HasMany(x => x.Stakes).WithOne();
+            entity.HasMany(x => x.Images).WithOne().OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Bids).WithOne(x => x.Auction);
         });
         
         modelBuilder.Entity<Image>(entity =>
@@ -47,11 +47,12 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
             
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedOnAdd();
+            entity.HasOne(x => x.Body).WithOne().OnDelete(DeleteBehavior.Cascade).HasForeignKey<ImageBody>(x => x.ImageId);
         });
         
-        modelBuilder.Entity<Stake>(entity =>
+        modelBuilder.Entity<Bid>(entity =>
         {
-            entity.ToTable("Stakes");
+            entity.ToTable("Bids");
             
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedOnAdd();

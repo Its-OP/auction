@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using infrastructure;
@@ -11,9 +12,11 @@ using infrastructure;
 namespace infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240208185229_Update structure of images")]
+    partial class Updatestructureofimages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,10 +40,10 @@ namespace infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("MinBidValue")
+                    b.Property<decimal>("MinPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("MinPrice")
+                    b.Property<decimal>("MinStakeValue")
                         .HasColumnType("numeric");
 
                     b.Property<int>("Status")
@@ -53,35 +56,6 @@ namespace infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Auctions", (string)null);
-                });
-
-            modelBuilder.Entity("domain.Bid", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("AuctionId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuctionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Bids", (string)null);
                 });
 
             modelBuilder.Entity("domain.Image", b =>
@@ -128,6 +102,35 @@ namespace infrastructure.Migrations
                     b.ToTable("ImageBody");
                 });
 
+            modelBuilder.Entity("domain.Stake", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("AuctionId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuctionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Stakes", (string)null);
+                });
+
             modelBuilder.Entity("domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -154,25 +157,6 @@ namespace infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("domain.Bid", b =>
-                {
-                    b.HasOne("domain.Auction", "Auction")
-                        .WithMany("Bids")
-                        .HasForeignKey("AuctionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("domain.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Auction");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("domain.Image", b =>
                 {
                     b.HasOne("domain.Auction", null)
@@ -190,11 +174,30 @@ namespace infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("domain.Stake", b =>
+                {
+                    b.HasOne("domain.Auction", "Auction")
+                        .WithMany("Stakes")
+                        .HasForeignKey("AuctionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Auction");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("domain.Auction", b =>
                 {
-                    b.Navigation("Bids");
-
                     b.Navigation("Images");
+
+                    b.Navigation("Stakes");
                 });
 
             modelBuilder.Entity("domain.Image", b =>

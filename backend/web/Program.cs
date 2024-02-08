@@ -11,6 +11,8 @@ builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddResponseCaching();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -20,6 +22,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseResponseCaching();
 app.UseHttpsRedirection();
 app.MapControllers();
 

@@ -21,16 +21,17 @@ public class UsersController: ControllerBase
     
     [HttpPost]
     [Route("")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(CreateUserErrorCodes))]
     public async Task<IActionResult> CreateUser([FromBody] UserArguments userArguments, CancellationToken token)
     {
         if (await _context.Users.AnyAsync(x => x.Username == userArguments.Username, token))
-            return BadRequest(ErrorCodes.UserAlreadyExists);
+            return BadRequest(CreateUserErrorCodes.UserAlreadyExists);
         
         if (userArguments.Password.Length < 6)
-            return BadRequest(ErrorCodes.PasswordTooSimple);
+            return BadRequest(CreateUserErrorCodes.PasswordTooSimple);
         
         if (userArguments.Password.Length > 16)
-            return BadRequest(ErrorCodes.PasswordTooLong);
+            return BadRequest(CreateUserErrorCodes.PasswordTooLong);
         
         using var sha256 = SHA256.Create();
         var passwordBytes = Encoding.UTF8.GetBytes(userArguments.Password);

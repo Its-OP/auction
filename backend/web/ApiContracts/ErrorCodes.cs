@@ -1,12 +1,17 @@
-﻿namespace backend.ApiContracts;
+﻿using System.Text.Json.Serialization;
 
-public enum ErrorCodes
+namespace backend.ApiContracts;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum CreateUserErrorCodes
 {
     UserAlreadyExists,
     PasswordTooSimple,
-    PasswordTooLong,
-    
-    MissingThumbnail,
-    InvalidPageSize,
-    InvalidPageNumber
+    PasswordTooLong
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum BidErrorCodes
+{
+    BidFailed,
 }

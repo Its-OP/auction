@@ -4,6 +4,6 @@ namespace backend.ApiContracts;
 
 public class ImageContract
 {
-    public ImageClass Class { get; set; }
-    public string Base64Image { get; set; }
+    public ImageDetails Metadata { get; set; }
+    public string Base64Body { get; set; }
 }

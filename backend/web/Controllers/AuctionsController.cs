@@ -21,13 +21,13 @@ public class AuctionsController : ControllerBase
     [Route("")]
     public async Task<IActionResult> CreateAuction([FromBody] AuctionArguments auctionArguments, CancellationToken token)
     {
-        if (auctionArguments.Images.Count(x => x.Class == ImageClass.Thumbnail) != 1)
-            return BadRequest(ErrorCodes.MissingThumbnail);
-
-        var images = auctionArguments.Images.Select(x => new Image(x.Base64Image, x.Class)).ToList();
+        if (auctionArguments.Images.Count(x => x.Metadata.Type == ImageType.Thumbnail) != 1)
+            return BadRequest("There must be exactly 1 thumbnail");
+        
+        var images = auctionArguments.Images.Select(x => new Image(x.Metadata.Type, new ImageBody(x.Base64Body))).ToList();
         await _context.Images.AddRangeAsync(images, token);
         
-        var auction = new Auction(auctionArguments.Title, auctionArguments.MinPrice, auctionArguments.Description, images, Enumerable.Empty<Stake>());
+        var auction = new Auction(auctionArguments.Title, auctionArguments.MinPrice, auctionArguments.MinStakeValue, auctionArguments.Description, images);
         await _context.Auctions.AddAsync(auction, token);
         await _context.SaveChangesAsync(token);
 
@@ -36,24 +36,27 @@ public class AuctionsController : ControllerBase
     
     [HttpGet]
     [Route("")]
-    public async Task<IActionResult> GetAuctions([FromQuery] int pageSize, [FromQuery] int pageNumber, CancellationToken token)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AuctionContract>))]
+    public async Task<IActionResult> GetAuctions(CancellationToken token, [FromQuery] int pageSize = 10, [FromQuery] int pageNumber = 1)
     {
         if (pageSize < 1)
-            return BadRequest(ErrorCodes.InvalidPageSize);
+            return BadRequest("Page size is invalid");
 
         pageSize = Math.Min(pageSize, 100);
         
         if (pageNumber < 1)
-            return BadRequest(ErrorCodes.InvalidPageNumber);
+            return BadRequest("Page number is invalid");
 
         var auctions = await _context.Auctions.Select(x => new AuctionContract
         {
             Id = x.Id,
             Description = x.Description,
             MinPrice = x.MinPrice,
+            MinStakeValue = x.MinBidValue,
             Title = x.Title,
             Status = x.Status,
-            ThumbnailUrl = x.Images.Single(i => i.Class == ImageClass.Thumbnail).Url
+            ThumbnailId = x.Images.Single(i => i.Type == ImageType.Thumbnail).Id,
+            Images = x.Images.Select(i => new ImageDetails(i.Id, i.Type)).ToList()
         }).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
 
         return Ok(auctions);
