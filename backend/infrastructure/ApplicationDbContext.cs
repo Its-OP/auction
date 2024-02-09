@@ -21,6 +21,7 @@ public class ApplicationDbContext: DbContext, IApplicationDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        optionsBuilder.UseLazyLoadingProxies();
         optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Database"));
     }
 

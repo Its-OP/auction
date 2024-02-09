@@ -15,3 +15,9 @@ public enum BidErrorCodes
 {
     BidFailed,
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum UpdateAuctionErrorCodes
+{
+    AuctionIsClosed,
+}

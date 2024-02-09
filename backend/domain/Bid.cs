@@ -13,6 +13,6 @@ public class Bid
     public int Id { get; set; }
     public decimal Amount { get; set; }
     public DateTime Timestamp { get; set; }
-    public User User { get; set; }
-    public Auction Auction { get; set; }
+    public virtual User User { get; set; }
+    public virtual Auction Auction { get; set; }
 }

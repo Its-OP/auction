@@ -18,20 +18,24 @@ public class AuctionsController : ControllerBase
     }
     
     [HttpPost]
-    [Route("")]
-    public async Task<IActionResult> CreateAuction([FromBody] AuctionArguments auctionArguments, CancellationToken token)
+    [Route("{userId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuctionContract))]
+    public async Task<IActionResult> CreateAuction([FromBody] AuctionArguments auctionArguments, int userId, CancellationToken token)
     {
+        if (!AuctionArgumentsAreValid(auctionArguments))
+            return BadRequest("Arguments are invalid");
+        
         if (auctionArguments.Images.Count(x => x.Metadata.Type == ImageType.Thumbnail) != 1)
             return BadRequest("There must be exactly 1 thumbnail");
         
         var images = auctionArguments.Images.Select(x => new Image(x.Metadata.Type, new ImageBody(x.Base64Body))).ToList();
-        await _context.Images.AddRangeAsync(images, token);
-        
-        var auction = new Auction(auctionArguments.Title, auctionArguments.MinPrice, auctionArguments.MinStakeValue, auctionArguments.Description, images);
+
+        var host = await _context.Users.SingleAsync(x => x.Id == userId, token);
+        var auction = new Auction(auctionArguments.Title, auctionArguments.MinPrice, auctionArguments.MinBidValue, auctionArguments.Description, images, host);
         await _context.Auctions.AddAsync(auction, token);
         await _context.SaveChangesAsync(token);
 
-        return Ok();
+        return Ok(new AuctionContract(auction));
     }
     
     [HttpPost]
@@ -62,18 +66,98 @@ public class AuctionsController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("Page number is invalid");
 
-        var auctions = await _context.Auctions.Select(x => new AuctionContract
-        {
-            Id = x.Id,
-            Description = x.Description,
-            MinPrice = x.MinPrice,
-            MinStakeValue = x.MinBidValue,
-            Title = x.Title,
-            Status = x.Status,
-            ThumbnailId = x.Images.Single(i => i.Type == ImageType.Thumbnail).Id,
-            Images = x.Images.Select(i => new ImageDetails(i.Id, i.Type)).ToList()
-        }).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
+        var auctions = await _context.Auctions.Select(x => new AuctionContract(x)).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
 
         return Ok(auctions);
+    }
+    
+    [HttpPut]
+    [Route("update/{auctionId:int}")]
+    public async Task<IActionResult> UpdateAuctionDetails([FromBody] AuctionArguments auctionArguments, int auctionId, CancellationToken token)
+    {
+        if (!AuctionArgumentsAreValid(auctionArguments))
+            return BadRequest("Arguments are invalid");
+        
+        var auction = await _context.Auctions.Include(x => x.Images).Include(x => x.Host).SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction does not exist");
+
+        if (auction.IsReadOnly())
+            return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
+
+        auction.Description = auctionArguments.Description;
+        auction.MinPrice = auctionArguments.MinPrice;
+        auction.Title = auctionArguments.Title;
+        auction.MinBidValue = auctionArguments.MinBidValue;
+        
+        _context.Auctions.Update(auction);
+        await _context.SaveChangesAsync(token);
+
+        return Ok(new AuctionContract(auction));
+    }
+    
+    [HttpPut]
+    [Route("gallery/{auctionId:int}/thumbnail")]
+    public async Task<IActionResult> UpdateAuctionThumbnail([FromBody] ImageContract newThumbnail, int auctionId, CancellationToken token)
+    {
+        var auction = await _context.Auctions.Include(x => x.Images).SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction does not exist");
+
+        if (auction.IsReadOnly())
+            return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
+
+        var thumbnail = auction.Images.Single(x => x.Type == ImageType.Thumbnail);
+        thumbnail.Body.Base64Body = newThumbnail.Base64Body;
+        
+        _context.Images.Update(thumbnail);
+        await _context.SaveChangesAsync(token);
+
+        return Ok(new AuctionContract(auction));
+    }
+    
+    [HttpDelete]
+    [Route("gallery/{auctionId:int}/image/{imageId:int}")]
+    public async Task<IActionResult> DeleteGalleryImage(int auctionId, int imageId, CancellationToken token)
+    {
+        var auction = await _context.Auctions.Include(x => x.Images).SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction does not exist");
+
+        if (auction.IsReadOnly())
+            return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
+
+        var image = auction.Images.SingleOrDefault(x => x.Id == imageId);
+        if (image is null)
+            return BadRequest("Image does not exist");
+        
+        _context.Images.Remove(image);
+        await _context.SaveChangesAsync(token);
+
+        return Ok(new AuctionContract(auction));
+    }
+    
+    [HttpPut]
+    [Route("gallery/{auctionId:int}")]
+    public async Task<IActionResult> AddGalleryImage([FromBody] ImageContract newThumbnail, int auctionId, CancellationToken token)
+    {
+        var auction = await _context.Auctions.SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction does not exist");
+
+        if (auction.IsReadOnly())
+            return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
+
+        var image = new Image(ImageType.Gallery, new ImageBody(newThumbnail.Base64Body));
+        auction.Images.Add(image);
+        
+        await _context.SaveChangesAsync(token);
+
+        return Ok(new AuctionContract(auction));
+    }
+
+    private static bool AuctionArgumentsAreValid(AuctionArguments args)
+    {
+        return args is { MinBidValue: > 0, MinPrice: > 0 };
     }
 }

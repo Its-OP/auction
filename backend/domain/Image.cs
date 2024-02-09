@@ -14,7 +14,7 @@ public class Image
     
     public int Id { get; set; }
     public ImageType Type { get; set; }
-    public ImageBody Body { get; set; }
+    public virtual ImageBody Body { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
