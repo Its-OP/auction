@@ -3,7 +3,7 @@
 namespace backend.ApiContracts;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CreateUserErrorCodes
+public enum SignUpErrorCodes
 {
     UserAlreadyExists,
     PasswordTooSimple,

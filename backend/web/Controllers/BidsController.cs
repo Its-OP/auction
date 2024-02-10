@@ -1,12 +1,13 @@
 ﻿using backend.ApiContracts;
-using domain;
 using domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/bids")]
 public class BidsController : ControllerBase
 {
@@ -20,21 +21,22 @@ public class BidsController : ControllerBase
     [HttpPost]
     [Route("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BidErrorCodes))]
-    public async Task<IActionResult> Bid([FromBody] StakeArguments stakeArguments, CancellationToken token)
+    public async Task<IActionResult> Bid([FromBody] BidArguments bidArguments, CancellationToken token)
     {
-        if (!await _context.Users.AnyAsync(x => x.Username == stakeArguments.BidderUsername, token))
+        var bidderUsername = User.GetUsername();
+        var bidder = await _context.Users.SingleOrDefaultAsync(x => x.Username == bidderUsername, token);
+        if (bidder is null)
             return BadRequest("User not found");
         
-        if (!await _context.Auctions.AnyAsync(x => x.Id == stakeArguments.AuctionId, token))
+        if (!await _context.Auctions.AnyAsync(x => x.Id == bidArguments.AuctionId, token))
             return BadRequest("Auction not found");
 
-        var auction = await _context.Auctions.SingleAsync(x => x.Id == stakeArguments.AuctionId, token);
-        var user = await _context.Users.SingleAsync(x => x.Username == stakeArguments.BidderUsername, token);
-        var bidSuccessful = auction.TryBid(stakeArguments.Value, out var bid);
+        var auction = await _context.Auctions.SingleAsync(x => x.Id == bidArguments.AuctionId, token);
+        var bidSuccessful = auction.TryBid(bidArguments.Value, out var bid);
 
         if (bidSuccessful)
         {
-            bid.User = user;
+            bid.User = bidder;
             _context.Auctions.Update(auction);
             await _context.Bids.AddAsync(bid, token);
             await _context.SaveChangesAsync(token);

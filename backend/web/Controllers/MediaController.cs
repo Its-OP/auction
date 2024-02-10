@@ -1,11 +1,13 @@
 ﻿using backend.ApiContracts;
 using domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/media")]
 public class MediaController: ControllerBase
 {

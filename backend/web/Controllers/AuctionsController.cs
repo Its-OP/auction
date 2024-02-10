@@ -1,12 +1,14 @@
 ﻿using backend.ApiContracts;
 using domain;
 using domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/auctions")]
 public class AuctionsController : ControllerBase
 {
@@ -18,9 +20,9 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpPost]
-    [Route("{userId:int}")]
+    [Route("")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuctionContract))]
-    public async Task<IActionResult> CreateAuction([FromBody] AuctionArguments auctionArguments, int userId, CancellationToken token)
+    public async Task<IActionResult> CreateAuction([FromBody] AuctionArguments auctionArguments, CancellationToken token)
     {
         if (!AuctionArgumentsAreValid(auctionArguments))
             return BadRequest("Arguments are invalid");
@@ -30,7 +32,9 @@ public class AuctionsController : ControllerBase
 
         var images = auctionArguments.Images.Select(x => new Image(x.Metadata.Type, new ImageBody(x.Base64Body))).ToList();
 
-        var host = await _context.Users.SingleAsync(x => x.Id == userId, token);
+        var hostUsername = User.GetUsername();
+        var host = await _context.Users.SingleAsync(x => x.Username == hostUsername, token);
+        
         var auction = new Auction(auctionArguments.Title, auctionArguments.MinPrice, auctionArguments.MinBidValue, auctionArguments.Description, images, host);
         await _context.Auctions.AddAsync(auction, token);
         await _context.SaveChangesAsync(token);
@@ -45,6 +49,9 @@ public class AuctionsController : ControllerBase
         var auction = await _context.Auctions.SingleOrDefaultAsync(x => x.Id == auctionId, token);
         if (auction is null)
             return BadRequest("Auction not found");
+        
+        if (!CurrentUserIsAuctionHost(auction))
+            return Unauthorized();
 
         auction.Close();
         _context.Auctions.Update(auction);
@@ -109,6 +116,9 @@ public class AuctionsController : ControllerBase
         var auction = await _context.Auctions.Include(x => x.Images).Include(x => x.Host).SingleOrDefaultAsync(x => x.Id == auctionId, token);
         if (auction is null)
             return BadRequest("Auction does not exist");
+        
+        if (!CurrentUserIsAuctionHost(auction))
+            return Unauthorized();
 
         if (auction.IsReadOnly())
             return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
@@ -131,6 +141,9 @@ public class AuctionsController : ControllerBase
         var auction = await _context.Auctions.Include(x => x.Images).SingleOrDefaultAsync(x => x.Id == auctionId, token);
         if (auction is null)
             return BadRequest("Auction does not exist");
+        
+        if (!CurrentUserIsAuctionHost(auction))
+            return Unauthorized();
 
         if (auction.IsReadOnly())
             return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
@@ -151,6 +164,9 @@ public class AuctionsController : ControllerBase
         var auction = await _context.Auctions.Include(x => x.Images).SingleOrDefaultAsync(x => x.Id == auctionId, token);
         if (auction is null)
             return BadRequest("Auction does not exist");
+        
+        if (!CurrentUserIsAuctionHost(auction))
+            return Unauthorized();
 
         if (auction.IsReadOnly())
             return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
@@ -172,6 +188,9 @@ public class AuctionsController : ControllerBase
         var auction = await _context.Auctions.SingleOrDefaultAsync(x => x.Id == auctionId, token);
         if (auction is null)
             return BadRequest("Auction does not exist");
+        
+        if (!CurrentUserIsAuctionHost(auction))
+            return Unauthorized();
 
         if (auction.IsReadOnly())
             return BadRequest(UpdateAuctionErrorCodes.AuctionIsClosed);
@@ -187,5 +206,11 @@ public class AuctionsController : ControllerBase
     private static bool AuctionArgumentsAreValid(AuctionArguments args)
     {
         return args is { MinBidValue: > 0, MinPrice: > 0 };
+    }
+
+    private bool CurrentUserIsAuctionHost(Auction auction)
+    {
+        var hostUsername = User.GetUsername();
+        return auction.Host.Username == hostUsername;
     }
 }
