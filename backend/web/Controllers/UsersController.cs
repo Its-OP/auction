@@ -25,7 +25,7 @@ public class UsersController: ControllerBase
     }
     
     [HttpPost]
-    [Route("singUp")]
+    [Route("signUp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SignUpErrorCodes))]
     public async Task<IActionResult> SignUp([FromBody] SignUpArguments signUpArguments, CancellationToken token)
     {
@@ -47,7 +47,7 @@ public class UsersController: ControllerBase
     }
     
     [HttpPost]
-    [Route("singIn")]
+    [Route("signIn")]
     public async Task<IActionResult> SignIn([FromBody] SignInArguments signInArguments, CancellationToken token)
     {
         var passwordHash = await GetPasswordHash(signInArguments.Password, token);

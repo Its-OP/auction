@@ -1,7 +1,9 @@
 ﻿using backend.ApiContracts;
 using domain.Interfaces;
+using infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
@@ -12,10 +14,12 @@ namespace backend.Controllers;
 public class BidsController : ControllerBase
 {
     private readonly IApplicationDbContext _context;
+    private readonly IHubContext<BidsHub, IBidsClient> _bidsHub;
 
-    public BidsController(IApplicationDbContext context)
+    public BidsController(IApplicationDbContext context, IHubContext<BidsHub, IBidsClient> bidsHub)
     {
         _context = context;
+        _bidsHub = bidsHub;
     }
     
     [HttpPost]
@@ -40,7 +44,9 @@ public class BidsController : ControllerBase
             _context.Auctions.Update(auction);
             await _context.Bids.AddAsync(bid, token);
             await _context.SaveChangesAsync(token);
-            return Ok();
+            var apiBid = new BidContract(bid);
+            await _bidsHub.Clients.Group("bids-" + apiBid.AuctionId).OnNewBid(apiBid);
+            return Ok(apiBid);
         }
 
         return BadRequest(BidErrorCodes.BidFailed);
