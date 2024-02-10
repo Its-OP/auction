@@ -28,21 +28,25 @@ public class Auction
     public virtual ICollection<Bid> Bids { get; set; } = new List<Bid>();
     public virtual User Host { get; set; }
 
+    public Bid? GetWinningBid() => Bids.LastOrDefault();
+    public Image GetThumbnail() => Images.Single(x => x.Type == ImageType.Thumbnail);
+    public IEnumerable<Image> GetGallery() => Images.Where(x => x.Type != ImageType.Thumbnail);
+
     public bool TryBid(decimal value, out Bid bid)
     {
         bid = new Bid();
-        if (Status == AuctionStatus.Closed)
+        if (IsReadOnly())
             return false;
 
         if (CurrentPrice == 0 && value >= MinPrice)
         {
-            bid = Bid(value);
+            bid = PlaceBid(value);
             return true;
         }
 
         if (CurrentPrice > 0 && value - CurrentPrice >= MinBidValue)
         {
-            bid = Bid(value);
+            bid = PlaceBid(value);
             return true;
         }
 
@@ -59,7 +63,7 @@ public class Auction
         return Status == AuctionStatus.Closed;
     }
 
-    private Bid Bid(decimal value)
+    private Bid PlaceBid(decimal value)
     {
         var bid = new Bid(value, DateTime.UtcNow, this);
         CurrentPrice = value;

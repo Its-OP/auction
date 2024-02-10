@@ -46,7 +46,7 @@ public class BidsController : ControllerBase
     
     [HttpGet]
     [Route("{auctionId:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<StakeContract>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<BidContract>))]
     public async Task<IActionResult> GetStakes(int auctionId, CancellationToken token)
     {
         var auction = await _context
@@ -58,12 +58,7 @@ public class BidsController : ControllerBase
         if (auction is null)
             return BadRequest("Auction does not exist");
 
-        var stakes = auction.Bids.Select(x => new StakeContract
-        {
-            Timestamp = x.Timestamp,
-            Username = x.User.Username,
-            Value = x.Amount
-        }).ToList();
+        var stakes = auction.Bids.Select(x => new BidContract(x)).ToList();
 
         return Ok(stakes);
     }

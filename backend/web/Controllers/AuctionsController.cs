@@ -66,9 +66,17 @@ public class AuctionsController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("Page number is invalid");
 
-        var auctions = await _context.Auctions.Select(x => new AuctionContract(x)).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(token);
-
-        return Ok(auctions);
+        var auctions = await _context
+            .Auctions
+            .Include(x => x.Images)
+            .Include(x => x.Bids)
+            .Include(x => x.Host)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(token);
+        
+        var contracts = auctions.Select(x => new AuctionContract(x)).ToList();
+        return Ok(contracts);
     }
     
     [HttpPut]
