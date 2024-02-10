@@ -1,5 +1,6 @@
 using domain.Interfaces;
 using infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+await using var scope = app.Services.CreateAsyncScope();
+var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+await context.Database.MigrateAsync();
 
 app.UseResponseCaching();
 app.UseHttpsRedirection();
