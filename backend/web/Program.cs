@@ -29,6 +29,8 @@ await context.Database.MigrateAsync();
 
 app.UseResponseCaching();
 app.UseHttpsRedirection();
+
+app.UseCors(o => o.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 app.MapControllers();
 
 app.Run();
