@@ -220,9 +220,8 @@ export const CurrentLot = () => {
                     ]}
                   >
                     <Input
-                      defaultValue={lot?.winningBid.value + lot.minStakeValue}
                       type={"number"}
-                      placeholder={"Сума ставки"}
+                      placeholder={`Сума ставки (Мін: ${lot?.winningBid?.value || lot?.minPrice || 0})`}
                     />
                   </Form.Item>
                   <Form.Item>
