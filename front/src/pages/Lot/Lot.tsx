@@ -94,7 +94,7 @@ export const CurrentLot = () => {
   }, []);
 
   const onFinish = async ({ value }: any) => {
-    const min = (lot?.winningBid.value ?? 0) + (lot?.minStakeValue ?? 0);
+    const min = (lot?.winningBid?.value ?? 0) + (lot?.minStakeValue ?? 0);
 
     if (value < min) {
       message.error(`Сумма ставки не можу бути менщою ${currencyFormat(min)}`);
