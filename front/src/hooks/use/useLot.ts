@@ -1,76 +1,84 @@
-import {useLotApi} from "../api/useLotApi.ts";
-import {useState} from "react";
-import {IBid, Lot, Lots} from "../../types/types.ts";
-import {HTTP_METHOD, useHttp} from "../shared/useHttp.ts";
-import {api} from "../../const/api.ts";
-import {useNavigate} from "react-router-dom";
+import { useLotApi } from "../api/useLotApi.ts";
+import { useState } from "react";
+import { IBid, Lot, Lots } from "../../types/types.ts";
+import { HTTP_METHOD, useHttp } from "../shared/useHttp.ts";
+import { api } from "../../const/api.ts";
 
-export const useLot=()=>{
+export const useLot = () => {
+  const [page, setPage] = useState<number>(1);
 
-    const [page ,setPage] = useState<number>(1)
+  const { bids, auctions } = api;
+  const { lotApiLoading, fetchLots, fetchLot } = useLotApi();
+  const { request, loading } = useHttp();
 
-    const {bids,auctions}= api
-    const{lotApiLoading,fetchLots,fetchLot}= useLotApi()
-    const{request,loading} = useHttp()
+  const [lots, setLots] = useState<Lots>([]);
+  const [lot, setLot] = useState<Lot>();
 
-    const [lots,setLots] = useState<Lots>([])
-    const [lot, setLot] = useState<Lot>()
+  const getLots = async (params?: string) => {
+    const res = await fetchLots(params);
 
-   const getLots = async (params?:string)=>{
-        const res =await fetchLots(params)
+    setLots(res);
+    setPage(1);
+  };
+  const getLot = async (id: number) => {
+    const res = await fetchLot(id);
 
-       setLots(res);
-        setPage(1)
-   }
-    const getLot = async (id:number)=>{
-        const res =await fetchLot(id)
+    setLot(res);
+  };
 
-        setLot(res);
-    }
+  const doBid = async (body: {
+    auctionId: number;
+    value: number;
+  }): Promise<IBid> => {
+    const res: IBid = await request(bids, HTTP_METHOD.POST, body);
 
-    const doBid =async (body:{
-        "auctionId": number,
-        "value": number
-    }):Promise<IBid>=>{
+    return res;
+  };
 
-        const res:IBid = await request(bids, HTTP_METHOD.POST, body)
+  const updateCurrentSum = (bid: IBid) => {
+    setLot((prev) => {
+      if (prev) {
+        prev.winningBid = bid;
+      }
+      return prev;
+    });
+  };
 
-        return res
-    }
+  const closeLot = async (id: number) => {
+    await request(`${auctions}close/${id}`, HTTP_METHOD.POST);
 
-    const updateCurrentSum =(bid:IBid)=>{
-        setLot(prev=>{
-           if(prev){
-               prev.winningBid = bid
-           }
-            return prev
-        })
-    }
+    setLot((prev) => {
+      if (prev) {
+        prev.status = "Closed";
+      }
+      return prev;
+    });
+  };
 
-    const closeLot = async(id:number)=>{
-          await request(`${auctions}close/${id}`, HTTP_METHOD.POST)
+  const editLot = async (lot: any) => {
+    await request(`${auctions}update/${lot.id}`, HTTP_METHOD.POST, lot);
+  };
 
-        setLot(prev=>{
+  const loadMore = async (params?: string) => {
+    const nextPage = page + 1;
+    const res = await fetchLots(`?pageNumber=${nextPage}${params ?? ""}`);
 
-            if(prev){
-                prev.status = "Closed"
-            }
-            return prev
-        })
-    }
+    setLots((prev) => [...prev, ...res]);
+    setPage((prev) => ++prev);
+  };
 
-    const editLot = async(lot:any)=>{
-          await request(`${auctions}update/${lot.id}`, HTTP_METHOD.POST, lot)
-    }
-
-    const loadMore =async (params?:string)=>{
-        const nextPage = page +1
-        const res =await fetchLots(`?pageNumber=${nextPage}`)
-
-        setLots((prev)=>([...prev,...res]));
-        setPage((prev)=> ++prev)
-
-    }
-
-    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot,editLot,loadMore,page}
-}
+  return {
+    lotApiLoading,
+    lots,
+    lot,
+    getLots,
+    getLot,
+    doBid,
+    updateCurrentSum,
+    lotLoading: loading,
+    closeLot,
+    editLot,
+    loadMore,
+    page,
+  };
+};

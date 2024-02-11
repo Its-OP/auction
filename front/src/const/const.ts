@@ -1,1 +1,1 @@
-export const BASE_TITLE = "Аукціон"
+export const BASE_TITLE = "Аукціон";
