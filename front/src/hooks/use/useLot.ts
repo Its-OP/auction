@@ -7,7 +7,8 @@ import {useNavigate} from "react-router-dom";
 
 export const useLot=()=>{
 
-    const navigate = useNavigate()
+    const [page ,setPage] = useState<number>(1)
+
     const {bids,auctions}= api
     const{lotApiLoading,fetchLots,fetchLot}= useLotApi()
     const{request,loading} = useHttp()
@@ -19,6 +20,7 @@ export const useLot=()=>{
         const res =await fetchLots(params)
 
        setLots(res);
+        setPage(1)
    }
     const getLot = async (id:number)=>{
         const res =await fetchLot(id)
@@ -59,9 +61,16 @@ export const useLot=()=>{
 
     const editLot = async(lot:any)=>{
           await request(`${auctions}update/${lot.id}`, HTTP_METHOD.POST, lot)
-        navigate("lot/" +lot.id)
-       // setLot(lot)
     }
 
-    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot,editLot}
+    const loadMore =async (params?:string)=>{
+        const nextPage = page +1
+        const res =await fetchLots(`?pageNumber=${nextPage}`)
+
+        setLots((prev)=>([...prev,...res]));
+        setPage((prev)=> ++prev)
+
+    }
+
+    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot,editLot,loadMore,page}
 }

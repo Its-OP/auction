@@ -7,7 +7,7 @@ import {useEffect} from "react";
 
 export const Main =()=>{
 
-const {lots,getLots, lotApiLoading}= useLot()
+const {lots,getLots, lotApiLoading,loadMore,page}= useLot()
 
     useEffect(() => {
         getLots()
@@ -18,6 +18,11 @@ const searchLots =async (values:any)=>{
     const q = `?search=${values.search ?? ""}&sort=${values.sort ?? ""}`
 
     getLots(q)
+}
+
+const getMoreLots = async ()=>{
+
+    loadMore()
 }
 
     return(<>
@@ -61,5 +66,10 @@ const searchLots =async (values:any)=>{
             }
 
         </Row>
+        {
+            lots.length === page * 10 ?<div  style={{marginTop:30, width:"100%", display:"flex", justifyContent:"center"}}>
+                <Button size={"large"} type={"primary"} onClick={getMoreLots}>Завантажитьи ще</Button>
+            </div>: null
+        }
     </>)
 }

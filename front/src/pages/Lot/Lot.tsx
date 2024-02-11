@@ -1,7 +1,7 @@
 import {useParams} from "react-router";
 import {useEffect, useState} from "react";
 import {IBid, ImageTypes} from "../../types/types.ts";
-import {Alert, Breadcrumb, Button, Card, Col, Empty, Form, Image, Input, List, Row, Typography} from "antd";
+import {Alert, Breadcrumb, Button, Card, Col, Empty, Form, Image, Input, List, message, Row, Typography} from "antd";
 import {currencyFormat} from "../../utils/currencyFormat.ts";
 import {Link} from "react-router-dom";
 import {Helmet} from "react-helmet"
@@ -79,6 +79,14 @@ export const CurrentLot =()=>{
     }, []);
 
     const onFinish =async ({value}:any)=>{
+
+        const min = (lot?.winningBid.value ?? 0) + (lot?.minStakeValue ?? 0)
+
+        if(value < min){
+            message.error(`Сумма ставки не можу бути менщою ${currencyFormat(min)}`)
+            return
+        }
+
       if(lotId){
           const res = await doBid({value,auctionId:+lotId})
           setBids((prev)=> ([...prev,res]))
@@ -92,7 +100,6 @@ export const CurrentLot =()=>{
             updateCurrentSum(res)
         }
     }
-
 const formater = new Intl.DateTimeFormat("uk-UA",{day:"numeric", month:"numeric",hour:"2-digit", minute:"2-digit",second:"2-digit"})
 
     if(!lot){
@@ -140,13 +147,18 @@ const formater = new Intl.DateTimeFormat("uk-UA",{day:"numeric", month:"numeric"
                     <Typography style={{margin:"20px 0 30px"}}>{lot?.description}</Typography>
 
                     {
-                        lot?.status === "Active"?          <Form onFinish={onFinish} layout={"inline"} style={{display:"flex"}}>
+                        lot?.status === "Active"?          <Form  onFinish={onFinish} layout={"inline"} style={{display:"flex"}}>
                             <div style={{display:"grid", gridTemplateColumns:"1fr 140px 120px"}}>
-                                <Form.Item style={{flex:1}} required name={"value"}
-                                           rules={[{ required: true, message: 'Будь ласка введіть суму ставки!' },
-                                               //{min:lot?.winningBid.value + lot.minStakeValue ?? 0, message:"Сума не можу бути меншою ставки"}
-                                           ]}>
-                                    <Input  type={"number"} placeholder={"Сума ставки"}/>
+                                <Form.Item
+                                           style={{flex:1}} required name={"value"}
+
+                                           rules={[
+                                               { required: true, message: 'Будь ласка введіть суму ставки!' },
+
+                                           ]}
+
+                                >
+                                    <Input  defaultValue={lot?.winningBid.value + lot.minStakeValue} type={"number"} placeholder={"Сума ставки"}/>
                                 </Form.Item>
                                 <Form.Item >
                                     <Button loading={lotLoading} style={{width:"100%"}} htmlType={"submit"}  type={"primary"}>Зробити ставку</Button>
