@@ -161,23 +161,27 @@ export const CreateLot: React.FC<{open:boolean, onClose:()=>void}> = ({open,onCl
                             <Input type={"number"} />
                         </Form.Item>
 
-                        <Form.Item label={"Головне зображення"} >
-                            <Upload
-                                customRequest={dummyRequest}
-                                listType="picture-card"
-                                className="avatar-uploader"
-                                showUploadList={false}
-                                beforeUpload={beforeUpload}
-                                onChange={handleChange}
-                            >
-                                {thumbnailUrl ? <img src={thumbnailUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-                            </Upload>
-                        </Form.Item>
+                        {
+                            !EDIT_MODE && <>
+                                <Form.Item label={"Головне зображення"} >
+                                    <Upload
+                                        customRequest={dummyRequest}
+                                        listType="picture-card"
+                                        className="avatar-uploader"
+                                        showUploadList={false}
+                                        beforeUpload={beforeUpload}
+                                        onChange={handleChange}
+                                    >
+                                        {thumbnailUrl ? <img src={thumbnailUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                                    </Upload>
+                                </Form.Item>
 
-                        <Form.Item  label={"Фотографії"}>
-                            <GalleryList galleryUrls={galleryUrls} setGalleryUrls={setGalleryUrls}/>
+                                <Form.Item  label={"Фотографії"}>
+                                    <GalleryList galleryUrls={galleryUrls} setGalleryUrls={setGalleryUrls}/>
 
-                        </Form.Item>
+                                </Form.Item>
+                            </>
+                        }
                         <Form.Item>
                             <Button loading={lotApiLoading} htmlType={"submit"} type={"primary"}>{EDIT_MODE ?"Застосувати зміни":"Опублікувати"}</Button>
                         </Form.Item>
