@@ -6,15 +6,11 @@ services:
       context: ./backend
     container_name: server
     ports:
-      - 5000:443
+      - 5000:80
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Database=Host=postgres;Database=auctions;Username=admin;Password=admin
-    volumes:
-      - ~/.aspnet/https:/https:ro
 
   postgres:
     image: postgres
