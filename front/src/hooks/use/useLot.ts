@@ -1,58 +1,84 @@
-import {useLotApi} from "../api/useLotApi.ts";
-import {useState} from "react";
-import {IBid, Lot, Lots} from "../../types/types.ts";
-import {HTTP_METHOD, useHttp} from "../shared/useHttp.ts";
-import {api} from "../../const/api.ts";
+import { useLotApi } from "../api/useLotApi.ts";
+import { useState } from "react";
+import { IBid, Lot, Lots } from "../../types/types.ts";
+import { HTTP_METHOD, useHttp } from "../shared/useHttp.ts";
+import { api } from "../../const/api.ts";
 
-export const useLot=()=>{
-const {bids,auctions}= api
-    const{lotApiLoading,fetchLots,fetchLot}= useLotApi()
-    const{request,loading} = useHttp()
+export const useLot = () => {
+  const [page, setPage] = useState<number>(1);
 
-    const [lots,setLots] = useState<Lots>([])
-    const [lot, setLot] = useState<Lot>()
+  const { bids, auctions } = api;
+  const { lotApiLoading, fetchLots, fetchLot } = useLotApi();
+  const { request, loading } = useHttp();
 
-   const getLots = async ()=>{
-        const res =await fetchLots()
+  const [lots, setLots] = useState<Lots>([]);
+  const [lot, setLot] = useState<Lot>();
 
-       setLots(res);
-   }
-    const getLot = async (id:number)=>{
-        const res =await fetchLot(id)
+  const getLots = async (params?: string) => {
+    const res = await fetchLots(params);
 
-        setLot(res);
-    }
+    setLots(res);
+    setPage(1);
+  };
+  const getLot = async (id: number) => {
+    const res = await fetchLot(id);
 
-    const doBid =async (body:{
-        "auctionId": number,
-        "value": number
-    }):Promise<IBid>=>{
+    setLot(res);
+  };
 
-        const res:IBid = await request(bids, HTTP_METHOD.POST, body)
+  const doBid = async (body: {
+    auctionId: number;
+    value: number;
+  }): Promise<IBid> => {
+    const res: IBid = await request(bids, HTTP_METHOD.POST, body);
 
-        return res
-    }
+    return res;
+  };
 
-    const updateCurrentSum =(bid:IBid)=>{
-        setLot(prev=>{
-           if(prev){
-               prev.winningBid = bid
-           }
-            return prev
-        })
-    }
+  const updateCurrentSum = (bid: IBid) => {
+    setLot((prev) => {
+      if (prev) {
+        prev.winningBid = bid;
+      }
+      return prev;
+    });
+  };
 
-    const closeLot = async(id:number)=>{
-          await request(`${auctions}close/${id}`, HTTP_METHOD.POST)
+  const closeLot = async (id: number) => {
+    await request(`${auctions}close/${id}`, HTTP_METHOD.POST);
 
-        setLot(prev=>{
+    setLot((prev) => {
+      if (prev) {
+        prev.status = "Closed";
+      }
+      return prev;
+    });
+  };
 
-            if(prev){
-                prev.status = "Closed"
-            }
-            return prev
-        })
-    }
+  const editLot = async (lot: any) => {
+    await request(`${auctions}update/${lot.id}`, HTTP_METHOD.POST, lot);
+  };
 
-    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot}
-}
+  const loadMore = async (params?: string) => {
+    const nextPage = page + 1;
+    const res = await fetchLots(`?pageNumber=${nextPage}${params ?? ""}`);
+
+    setLots((prev) => [...prev, ...res]);
+    setPage((prev) => ++prev);
+  };
+
+  return {
+    lotApiLoading,
+    lots,
+    lot,
+    getLots,
+    getLot,
+    doBid,
+    updateCurrentSum,
+    lotLoading: loading,
+    closeLot,
+    editLot,
+    loadMore,
+    page,
+  };
+};
