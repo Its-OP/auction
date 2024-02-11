@@ -3,12 +3,12 @@ import {Lot, Lots} from "../../types/types.ts";
 import {api} from "../../const/api.ts";
 
 export const useLotApi =()=>{
-const{auctions}= api
+const{auctions,auctionsforSearch}= api
     const {loading, request}= useHttp()
 
 
-    const fetchLots = async():Promise<Lots>=>{
-                const res = await request(auctions)
+    const fetchLots = async(params?:string):Promise<Lots>=>{
+                const res = await request(auctionsforSearch + (params ?? ""))
 
             return res
     }
@@ -25,11 +25,18 @@ const{auctions}= api
         return res
     }
 
+
+    const editLot = async(lot:any)=>{
+        await request(`${auctions}update/${lot.id}`, HTTP_METHOD.PUT, lot)
+
+    }
+
     return{
         lotApiLoading:loading,
         fetchLots,
         createLot,
-        fetchLot
+        fetchLot,
+        editLot
     }
 
 }

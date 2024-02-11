@@ -6,11 +6,12 @@ import {Router} from "../../Router.tsx";
 import {CreateLot} from "../CreateLot/CreateLot.tsx";
 import {useEffect, useState} from "react";
 import {useAuthContext} from "../../context/authContext.tsx";
+import { useLotChangeContext} from "../../context/changeLotContext.tsx";
 
 export const MainLayout =()=>{
     const [open, setOpen] = useState(false);
-const {isAuth}= useAuthContext()
-
+    const {isAuth}= useAuthContext()
+    const {lotForEdit}= useLotChangeContext()
     const showDrawerCreateLot = () => {
         setOpen(true);
     };
@@ -19,23 +20,27 @@ const {isAuth}= useAuthContext()
         setOpen(false);
     };
 
-
+    useEffect(() => {
+        if(lotForEdit){
+            showDrawerCreateLot()
+        }
+    }, [lotForEdit]);
     useEffect(() => {
         if(!isAuth){
             onClose()
         }
     }, [isAuth]);
     return( <App message={{duration:5, maxCount:3}} >
-        <BrowserRouter>
-            <Layout style={{height:"100vh"}}>
-                <Header showDrawerCreateLot={showDrawerCreateLot} />
+                   <BrowserRouter>
+                       <Layout style={{height:"max-content",minHeight:"100vh",paddingBottom:30, width:"100%", overflow:"hidden"}}>
+                           <Header showDrawerCreateLot={showDrawerCreateLot} />
 
-                <Content style={{maxWidth:1280,margin:"auto", marginTop: 40, width:"100%"}}>
-                    <Router/>
-                </Content>
-                <CreateLot open={open} onClose={onClose} />
+                           <Content style={{maxWidth:1280,margin:"auto", marginTop: 40, width:"100%"}}>
+                               <Router/>
+                           </Content>
+                           <CreateLot open={open} onClose={onClose} />
 
-            </Layout>
-        </BrowserRouter>
+                       </Layout>
+                   </BrowserRouter>
     </App>)
 }

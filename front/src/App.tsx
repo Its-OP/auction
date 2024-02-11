@@ -4,6 +4,7 @@ import './App.css'
 import { StyleProvider } from '@ant-design/cssinjs';
 import {AuthContextProvider} from "./context/authContext.tsx";
 import {MainLayout} from "./components/MainLayout/MainLayout.tsx";
+import {ChangeLotContextProvider} from "./context/changeLotContext.tsx";
 
 
 export const Program =()=> {
@@ -12,7 +13,9 @@ export const Program =()=> {
   <StyleProvider  hashPriority="high">
       <ConfigProvider locale={UA}>
             <AuthContextProvider>
-                <MainLayout/>
+               <ChangeLotContextProvider>
+                   <MainLayout/>
+               </ChangeLotContextProvider>
             </AuthContextProvider>
       </ConfigProvider>
   </StyleProvider>

@@ -10,7 +10,7 @@ export const LotCard:JSXElementConstructor<{lot: Lot }>=({lot})=>{
     const{imageUrl}= api
     const{request}= useHttp()
 
-    const{minPrice,description,id}= lot
+    const{minPrice,description,id,title}= lot
 
     const [image, setImage] = useState<string>()
 
@@ -28,7 +28,7 @@ export const LotCard:JSXElementConstructor<{lot: Lot }>=({lot})=>{
 
     return <Card
 
-        title={description}
+        title={title}
         bodyStyle={{padding:"0px 0px 24px"}}
         extra={
             <Link to={`/lot/${id}`}>Детальніше</Link>

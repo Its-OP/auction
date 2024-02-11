@@ -10,9 +10,10 @@ import {useHttp} from "../../hooks/shared/useHttp.ts";
 import {api} from "../../const/api.ts";
 import {useLot} from "../../hooks/use/useLot.ts";
 import {useAuthContext} from "../../context/authContext.tsx";
+import {useLotChangeContext} from "../../context/changeLotContext.tsx";
 
 export const CurrentLot =()=>{
-
+    const{setLotForEdit}= useLotChangeContext()
     const{imageUrl,bids:bidsUrl}= api
     const {id: lotId}= useParams()
     const {userName}= useAuthContext()
@@ -155,11 +156,12 @@ const formater = new Intl.DateTimeFormat("uk-UA",{day:"numeric", month:"numeric"
                                 </Form.Item>
                             </div>
                         </Form>
-                            :<Alert message={"Данний лот закритий"} type={"error"} />
+                            :<Alert message={"Данний лот закрито"} type={"error"} />
                     }
                     {
-                        lot.status === "Active" && lot.hostUsername === userName && <div style={{marginTop:30}}>
+                        lot.status === "Active" && lot.hostUsername === userName && <div style={{marginTop:30, width:"100%", gap:20, display:"flex"}}>
                         <Button style={{flex: 1}} type={"primary"} danger onClick={()=>closeLot(lot?.id)}>Закрити лот</Button>
+                        <Button style={{flex: 1}}   onClick={()=>setLotForEdit(lot)}>Редагувати</Button>
                         </div>
                     }
                 </Card>
@@ -175,6 +177,20 @@ const formater = new Intl.DateTimeFormat("uk-UA",{day:"numeric", month:"numeric"
                             <Typography.Text >{
                                 formater.format(new Date(item.timestamp))
                                 }</Typography.Text>
+                        </List.Item>
+                    )}
+                />
+
+                <List
+                    style={{marginTop:30}}
+                    header={<Typography.Title level={5}>Учасники лоту</Typography.Title>}
+                    bordered
+                    dataSource={[...new Set(bids.map(bid => bid.username ?? []))]}
+                    renderItem={(item:string) => (
+                        <List.Item style={{display:"flex",alignItems:"center",justifyContent:"space-between", gap:10}}>
+                            <Typography.Text >{"Користувач "}</Typography.Text>
+                            <Typography.Text  strong>{item}</Typography.Text>
+
                         </List.Item>
                     )}
                 />

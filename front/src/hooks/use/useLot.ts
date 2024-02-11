@@ -3,17 +3,20 @@ import {useState} from "react";
 import {IBid, Lot, Lots} from "../../types/types.ts";
 import {HTTP_METHOD, useHttp} from "../shared/useHttp.ts";
 import {api} from "../../const/api.ts";
+import {useNavigate} from "react-router-dom";
 
 export const useLot=()=>{
-const {bids,auctions}= api
+
+    const navigate = useNavigate()
+    const {bids,auctions}= api
     const{lotApiLoading,fetchLots,fetchLot}= useLotApi()
     const{request,loading} = useHttp()
 
     const [lots,setLots] = useState<Lots>([])
     const [lot, setLot] = useState<Lot>()
 
-   const getLots = async ()=>{
-        const res =await fetchLots()
+   const getLots = async (params?:string)=>{
+        const res =await fetchLots(params)
 
        setLots(res);
    }
@@ -54,5 +57,11 @@ const {bids,auctions}= api
         })
     }
 
-    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot}
+    const editLot = async(lot:any)=>{
+          await request(`${auctions}update/${lot.id}`, HTTP_METHOD.POST, lot)
+        navigate("lot/" +lot.id)
+       // setLot(lot)
+    }
+
+    return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot,editLot}
 }

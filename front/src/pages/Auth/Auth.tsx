@@ -23,13 +23,11 @@ export const Auth =()=>{
 
     const [form] = useForm()
     const reg =async ()=>{
-       // @ts-ignore
-        const res = await signUp(form.getFieldsValue())
+     await signUp(form.getFieldsValue())
       }
 
     const logIn =async ()=>{
-        // @ts-ignore
-        const res = await signIn(form.getFieldsValue())
+     await signIn(form.getFieldsValue())
     }
 
     return(<>
@@ -69,10 +67,10 @@ export const Auth =()=>{
                     <Form.Item wrapperCol={{span: 24}} >
                       <div style={{width:"100%",display:"flex", gap:10}}>
                           <Button type="default" style={{flex: 1}} onClick={reg}>
-                              signUp
+                              Реєстрація
                           </Button>
                           <Button type="primary" style={{flex: 1}} onClick={logIn}>
-                              signIn
+                              Увійти
                           </Button>
                       </div>
                     </Form.Item>
