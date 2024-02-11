@@ -158,9 +158,9 @@ const formater = new Intl.DateTimeFormat("uk-UA",{day:"numeric", month:"numeric"
                             :<Alert message={"Данний лот закритий"} type={"error"} />
                     }
                     {
-                        lot.status === "Active" && lot.hostUsername === userName && <>
-                        <Button style={{width:"100%",marginTop:30}} type={"primary"} danger onClick={()=>closeLot(lot?.id)}>Закрити лот</Button>
-                        </>
+                        lot.status === "Active" && lot.hostUsername === userName && <div style={{marginTop:30}}>
+                        <Button style={{flex: 1}} type={"primary"} danger onClick={()=>closeLot(lot?.id)}>Закрити лот</Button>
+                        </div>
                     }
                 </Card>
                 <List

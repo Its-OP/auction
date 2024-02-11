@@ -43,7 +43,15 @@ const {bids,auctions}= api
     }
 
     const closeLot = async(id:number)=>{
-         const res = await request(`${auctions}close/${id}`, HTTP_METHOD.POST)
+          await request(`${auctions}close/${id}`, HTTP_METHOD.POST)
+
+        setLot(prev=>{
+
+            if(prev){
+                prev.status = "Closed"
+            }
+            return prev
+        })
     }
 
     return{lotApiLoading,lots,lot,getLots, getLot,doBid,updateCurrentSum,lotLoading:loading,closeLot}

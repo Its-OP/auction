@@ -22,7 +22,7 @@ const{auctions}= api
     const createLot = async (lot: any) => {
         const res = await request(auctions, HTTP_METHOD.POST, lot);
 
-
+        return res
     }
 
     return{

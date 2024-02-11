@@ -19,7 +19,7 @@ const {isAuth} = useAuthContext()
     return(
         <HeaderComponent   style={{ display: 'flex', alignItems: 'center',gap:20, backgroundColor:colorBgContainer }}>
 
-               <Link to={"/"} style={{flex:1}}><Typography.Link keyboard>Logo</Typography.Link></Link>
+               <Link to={"/"} style={{flex:1}}><Typography.Link style={{fontSize:"1.5rem"}}  strong keyboard>Logo</Typography.Link></Link>
 
                 <Button type={"primary"} onClick={showDrawerCreateLot}>Створити Лот</Button>
 
