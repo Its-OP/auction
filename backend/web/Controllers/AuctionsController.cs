@@ -60,7 +60,7 @@ public class AuctionsController : ControllerBase
         [FromQuery] int pageSize = 10,
         [FromQuery] int pageNumber = 1,
         [FromQuery] string search = "",
-        [FromQuery] string sort = "asc")
+        [FromQuery] string sort = "lastCreated")
     {
         if (pageSize < 1)
             return BadRequest("Page size is invalid");
@@ -74,17 +74,20 @@ public class AuctionsController : ControllerBase
         if (!string.IsNullOrEmpty(search))
             query = query.Where(x => x.Title.Contains(search));
 
-        if (sort == "asc")
+        switch (sort)
         {
-            query = query.OrderBy(x => x.MinPrice);
-        }
-        else if (sort == "desc")
-        {
-            query = query.OrderByDescending(x => x.MinPrice);
-        }
-        else
-        {
-            return BadRequest("Sorting order name is invalid. Allowed: 'asc', 'desc'.");
+            case "lastCreated":
+                query = query.OrderByDescending(x => x.Id);
+                break;
+            case "asc":
+                query = query.OrderBy(x => x.CurrentPrice < x.MinPrice ? x.MinPrice : x.CurrentPrice);
+                break;
+
+            case "desc":
+                query = query.OrderByDescending(x => x.CurrentPrice < x.MinPrice ? x.MinPrice : x.CurrentPrice);
+                break;
+            default:
+                return BadRequest("Sorting order name is invalid. Allowed: 'asc', 'desc', 'lastCreated'.");
         }
         
         var auctions = await query
