@@ -25,7 +25,7 @@ public class UsersController: ControllerBase
     }
     
     [HttpPost]
-    [Route("singUp")]
+    [Route("signUp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SignUpErrorCodes))]
     public async Task<IActionResult> SignUp([FromBody] SignUpArguments signUpArguments, CancellationToken token)
     {
@@ -43,19 +43,25 @@ public class UsersController: ControllerBase
         await _context.Users.AddAsync(user, token);
         await _context.SaveChangesAsync(token);
 
-        return Ok();
+        return SignInInternal(user);
     }
     
     [HttpPost]
-    [Route("singIn")]
+    [Route("signIn")]
     public async Task<IActionResult> SignIn([FromBody] SignInArguments signInArguments, CancellationToken token)
     {
         var passwordHash = await GetPasswordHash(signInArguments.Password, token);
         var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == signInArguments.Username
                                                                   && x.PasswordHash == passwordHash, token);
+        
         if (user is null)
             return Unauthorized();
 
+        return SignInInternal(user);
+    }
+
+    private IActionResult SignInInternal(User user)
+    {
         var secureKey = _configuration["Jwt:Key"];
         var issuer = _configuration["Jwt:Issuer"];
         if (string.IsNullOrEmpty(secureKey) || string.IsNullOrEmpty(issuer))
@@ -76,8 +82,7 @@ public class UsersController: ControllerBase
             signingCredentials: credentials);
 
         var jwtString = new JwtSecurityTokenHandler().WriteToken(jwtToken);
-
-        return Ok(jwtString);
+        return Ok(new { Token = jwtString });
     }
 
     private async Task<string> GetPasswordHash(string password, CancellationToken token)
