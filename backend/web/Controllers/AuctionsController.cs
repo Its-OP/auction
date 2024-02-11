@@ -105,6 +105,17 @@ public class AuctionsController : ControllerBase
         var contracts = auctions.Select(x => new AuctionContract(x)).ToList();
         return Ok(contracts);
     }
+    
+    [HttpGet]
+    [Route("{auctionId:int}")]
+    public async Task<IActionResult> GetAuction([FromRoute] int auctionId, CancellationToken token)
+    {
+        var auction = await _context.Auctions.SingleOrDefaultAsync(x => x.Id == auctionId, token);
+        if (auction is null)
+            return BadRequest("Auction not found");
+
+        return Ok(new AuctionContract(auction));
+    }
 
     [HttpPut]
     [Route("update/{auctionId:int}")]
