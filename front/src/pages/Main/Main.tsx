@@ -38,8 +38,8 @@ export const Main = () => {
           <Form.Item name={"sort"}>
             <Radio.Group defaultValue="lastCreated">
               <Radio.Button value="lastCreated">Останні</Radio.Button>
-              <Radio.Button value="asc">Ціна від більших</Radio.Button>
-              <Radio.Button value="desc">Ціна від меньших</Radio.Button>
+              <Radio.Button value="desc">Ціна від більших</Radio.Button>
+              <Radio.Button value="asc">Ціна від меньших</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <Form.Item>

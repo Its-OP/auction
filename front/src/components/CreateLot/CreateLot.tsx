@@ -160,10 +160,13 @@ export const CreateLot: React.FC<{ open: boolean; onClose: () => void }> = ({
           <Form.Item label={"Опис"} name={"description"}>
             <Input.TextArea />
           </Form.Item>
-          <Form.Item label={"Початкова ставка"} name={"minPrice"}>
+          <Form.Item label={"Мінімальна ціна"} name={"minPrice"}>
             <Input type={"number"} />
           </Form.Item>
-          <Form.Item label={"Мінімальна ставка"} name={"minBidValue"}>
+          <Form.Item
+            label={"Мінімальна різниця між ставками"}
+            name={"minBidValue"}
+          >
             <Input type={"number"} />
           </Form.Item>
 

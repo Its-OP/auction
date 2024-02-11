@@ -55,7 +55,8 @@ export const Auth = () => {
             <Form.Item<FieldType>
               label="Логін"
               name="username"
-              rules={[{ required: true, message: "Будь ласка введіть логін!" }]}
+              rules={[{ required: true, message: "Будь ласка введіть логін!" },
+               ]}
             >
               <Input />
             </Form.Item>
@@ -65,6 +66,7 @@ export const Auth = () => {
               name="password"
               rules={[
                 { required: true, message: "Будь ласка введіть пароль!" },
+                {type:"string", min:6, max:16, message:"Пароль має бути 6-16 символів"}
               ]}
             >
               <Input.Password />
